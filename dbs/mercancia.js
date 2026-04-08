@@ -1,4 +1,4 @@
-use('mercancia060426');
+use('mercancia');
 
 db.producto.deleteMany({});
 db.producto.insertMany([
