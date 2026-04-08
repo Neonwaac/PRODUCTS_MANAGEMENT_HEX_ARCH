@@ -1,0 +1,40 @@
+# Entorno virtual
+venv/
+env/
+ENV/
+.venv/
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de Flask
+instance/
+.webassets-cache
+
+# Configuración sensible
+.env
+
+# Archivos de logs
+*.log
+
+# Base de datos SQLite
+*.db
+*.sqlite3
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de IDEs
+.vscode/
+.idea/
+
+# Archivos de testing / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Archivos temporales
+*.swp

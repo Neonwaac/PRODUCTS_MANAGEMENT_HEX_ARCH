@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Productos</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+  <div class="container">
+
+    <nav class="nav-tabs">
+      <a href="/productos" class="nav-btn active">Productos MySQL</a>
+      <a href="/imagenes_productos" class="nav-btn">Imagenes Mongo</a>
+      <a href="/productos_completos" class="nav-btn">Datos unidos</a>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}" role="alert">
+            <span>{{ message }}</span>
+            <button type="button" class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="add-btn-wrapper">
+      <button type="button" class="add-btn" onclick="openModal('modalCrearProducto')" title="Agregar registro">+</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Lista de Productos</div>
+      <div class="card-body">
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="text-center">#</th>
+                <th>Producto</th>
+                <th>Marca</th>
+                <th class="text-center">Precio</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for i in data %}
+              <tr>
+                <td class="text-center cell-id">{{ i.idproducto }}</td>
+                <td class="cell-name">{{ i.producto }}</td>
+                <td><span class="badge badge-default">{{ i.marca }}</span></td>
+                <td class="text-center cell-price">$ {{ i.precio }}</td>
+                <td>
+                  <div class="cell-actions">
+                    <button
+                      type="button"
+                      class="btn btn-warning btn-sm"
+                      data-id="{{ i.idproducto }}"
+                      data-producto="{{ i.producto }}"
+                      data-marca="{{ i.marca }}"
+                      data-precio="{{ i.precio }}"
+                      onclick="cargarProducto(this)"
+                    >
+                      Editar
+                    </button>
+                    <form method="POST" action="/productos/eliminar/{{ i.idproducto }}" onsubmit="return confirm('Eliminar producto en MySQL?');">
+                      <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="5">
+                  <div class="empty-state">
+                    <p>No hay productos registrados</p>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal Crear -->
+  <div class="modal-overlay" id="modalCrearProducto">
+    <div class="modal">
+      <div class="modal-header">
+        <h5 class="modal-title">Agregar producto</h5>
+        <button type="button" class="modal-close" onclick="closeModal('modalCrearProducto')">&times;</button>
+      </div>
+      <form method="POST" action="/productos">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Producto</label>
+            <input type="text" class="form-control" name="producto" minlength="2" maxlength="120" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Marca</label>
+            <input type="text" class="form-control" name="marca" minlength="2" maxlength="120" required>
+          </div>
+          <div class="form-group mb-0">
+            <label class="form-label">Precio</label>
+            <input type="number" class="form-control" name="precio" min="0" step="0.01" inputmode="decimal" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalCrearProducto')">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Editar -->
+  <div class="modal-overlay" id="modalEditarProducto">
+    <div class="modal">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar producto</h5>
+        <button type="button" class="modal-close" onclick="closeModal('modalEditarProducto')">&times;</button>
+      </div>
+      <form method="POST" action="/productos/editar/0" id="formActualizarProducto">
+        <div class="modal-body">
+          <input type="hidden" id="idproductoActualizar" name="idproducto">
+          <div class="form-group">
+            <label class="form-label">Producto</label>
+            <input type="text" class="form-control" name="producto" minlength="2" maxlength="120" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Marca</label>
+            <input type="text" class="form-control" name="marca" minlength="2" maxlength="120" required>
+          </div>
+          <div class="form-group mb-0">
+            <label class="form-label">Precio</label>
+            <input type="number" class="form-control" name="precio" min="0" step="0.01" inputmode="decimal" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalEditarProducto')">Cancelar</button>
+          <button type="submit" class="btn btn-warning">Actualizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    // Cerrar modal al hacer click fuera
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('active');
+        }
+      });
+    });
+
+    const formActualizar = document.getElementById('formActualizarProducto');
+    const idActualizar = document.getElementById('idproductoActualizar');
+
+    function cargarProducto(boton) {
+      const id = boton.dataset.id;
+      idActualizar.value = id;
+      formActualizar.action = '/productos/editar/' + id;
+      formActualizar.querySelector('input[name="producto"]').value = boton.dataset.producto;
+      formActualizar.querySelector('input[name="marca"]').value = boton.dataset.marca;
+      formActualizar.querySelector('input[name="precio"]').value = boton.dataset.precio;
+      openModal('modalEditarProducto');
+    }
+
+    formActualizar.addEventListener('submit', function() {
+      formActualizar.action = '/productos/editar/' + idActualizar.value;
+    });
+  </script>
+
+</body>
+</html>

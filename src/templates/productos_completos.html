@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Productos Completos</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+  <div class="container">
+
+    <nav class="nav-tabs">
+      <a href="/productos" class="nav-btn">Productos MySQL</a>
+      <a href="/imagenes_productos" class="nav-btn">Imagenes Mongo</a>
+      <a href="/productos_completos" class="nav-btn active-green">Datos unidos</a>
+    </nav>
+
+    <h1 class="page-title">CRUD conjunto <span>MySQL + Mongo</span></h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}" role="alert">
+            <span>{{ message }}</span>
+            <button type="button" class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="add-btn-wrapper">
+      <button type="button" class="add-btn" onclick="openModal('modalCrearCompleto')" title="Agregar registro">+</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header header-dark">Registros vinculados (interseccion MySQL + Mongo)</div>
+      <div class="card-body">
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="text-center">ID</th>
+                <th>Producto</th>
+                <th>Marca</th>
+                <th class="text-center">Precio</th>
+                <th>Descripcion</th>
+                <th class="text-center">Imagen</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for i in data3 %}
+              <tr>
+                <td class="text-center cell-id">{{ i.idproducto }}</td>
+                <td class="cell-name">{{ i.producto }}</td>
+                <td><span class="badge badge-default">{{ i.marca }}</span></td>
+                <td class="text-center cell-price">$ {{ i.precio }}</td>
+                <td>{{ i.descripcion }}</td>
+                <td class="text-center">
+                  <img src="{{ i.url }}" alt="Imagen producto" class="img-thumbnail">
+                </td>
+                <td>
+                  <div class="cell-actions">
+                    <button
+                      type="button"
+                      class="btn btn-warning btn-sm"
+                      data-id="{{ i.idproducto }}"
+                      data-producto="{{ i.producto }}"
+                      data-marca="{{ i.marca }}"
+                      data-precio="{{ i.precio }}"
+                      data-descripcion="{{ i.descripcion }}"
+                      data-url="{{ i.url }}"
+                      onclick="cargarCompleto(this)"
+                    >
+                      Editar
+                    </button>
+                    <form method="POST" action="/productos_completos/eliminar/{{ i.idproducto }}" onsubmit="return confirm('Eliminar en ambas bases de datos?');">
+                      <button type="submit" class="btn btn-danger btn-sm">Eliminar ambos</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <p>No hay registros vinculados</p>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal Crear -->
+  <div class="modal-overlay" id="modalCrearCompleto">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h5 class="modal-title">Agregar registro conjunto</h5>
+        <button type="button" class="modal-close" onclick="closeModal('modalCrearCompleto')">&times;</button>
+      </div>
+      <form method="POST" action="/productos_completos">
+        <div class="modal-body">
+          <div class="form-row cols-2">
+            <div class="form-group">
+              <label class="form-label">Producto</label>
+              <input type="text" class="form-control" name="producto" minlength="2" maxlength="120" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Marca</label>
+              <input type="text" class="form-control" name="marca" minlength="2" maxlength="120" required>
+            </div>
+          </div>
+          <div class="form-row cols-4-8">
+            <div class="form-group">
+              <label class="form-label">Precio</label>
+              <input type="number" class="form-control" name="precio" min="0" step="0.01" inputmode="decimal" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Descripcion</label>
+              <input type="text" class="form-control" name="descripcion" minlength="3" maxlength="200" required>
+            </div>
+          </div>
+          <div class="form-group mb-0">
+            <label class="form-label">URL de imagen</label>
+            <input type="url" class="form-control" name="url" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalCrearCompleto')">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Editar -->
+  <div class="modal-overlay" id="modalEditarCompleto">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar registro conjunto</h5>
+        <button type="button" class="modal-close" onclick="closeModal('modalEditarCompleto')">&times;</button>
+      </div>
+      <form method="POST" action="/productos_completos/editar/0" id="formActualizarCompleto">
+        <div class="modal-body">
+          <input type="hidden" name="idproducto" id="idproductoCompleto">
+          <div class="form-row cols-2">
+            <div class="form-group">
+              <label class="form-label">Producto</label>
+              <input type="text" class="form-control" name="producto" minlength="2" maxlength="120" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Marca</label>
+              <input type="text" class="form-control" name="marca" minlength="2" maxlength="120" required>
+            </div>
+          </div>
+          <div class="form-row cols-4-8">
+            <div class="form-group">
+              <label class="form-label">Precio</label>
+              <input type="number" class="form-control" name="precio" min="0" step="0.01" inputmode="decimal" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Descripcion</label>
+              <input type="text" class="form-control" name="descripcion" minlength="3" maxlength="200" required>
+            </div>
+          </div>
+          <div class="form-group mb-0">
+            <label class="form-label">URL de imagen</label>
+            <input type="url" class="form-control" name="url" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalEditarCompleto')">Cancelar</button>
+          <button type="submit" class="btn btn-warning">Actualizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('active');
+        }
+      });
+    });
+
+    const formActualizarCompleto = document.getElementById('formActualizarCompleto');
+    const idproductoCompleto = document.getElementById('idproductoCompleto');
+
+    function cargarCompleto(boton) {
+      const id = boton.dataset.id;
+      idproductoCompleto.value = id;
+      formActualizarCompleto.action = '/productos_completos/editar/' + id;
+      formActualizarCompleto.querySelector('input[name="producto"]').value = boton.dataset.producto;
+      formActualizarCompleto.querySelector('input[name="marca"]').value = boton.dataset.marca;
+      formActualizarCompleto.querySelector('input[name="precio"]').value = boton.dataset.precio;
+      formActualizarCompleto.querySelector('input[name="descripcion"]').value = boton.dataset.descripcion;
+      formActualizarCompleto.querySelector('input[name="url"]').value = boton.dataset.url;
+      openModal('modalEditarCompleto');
+    }
+
+    formActualizarCompleto.addEventListener('submit', function() {
+      formActualizarCompleto.action = '/productos_completos/editar/' + idproductoCompleto.value;
+    });
+  </script>
+
+</body>
+</html>
