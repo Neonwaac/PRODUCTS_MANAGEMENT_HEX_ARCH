@@ -1,6 +1,6 @@
-drop schema if exists mercancia060426;
-create schema mercancia060426;
-use mercancia060426;
+drop schema if exists mercancia;
+create schema mercancia;
+use mercancia;
 
 
 create table producto(
