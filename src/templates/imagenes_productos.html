@@ -16,23 +16,6 @@
       <a href="/productos_completos" class="nav-btn">Datos unidos</a>
     </nav>
 
-    <h1 class="page-title">Imagenes <span>(MongoDB)</span></h1>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }}" role="alert">
-            <span>{{ message }}</span>
-            <button type="button" class="alert-close" onclick="this.parentElement.remove()">&times;</button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
-    <div class="add-btn-wrapper">
-      <button type="button" class="add-btn" onclick="openModal('modalCrearImagen')" title="Agregar registro">+</button>
-    </div>
-
     <div class="card">
       <div class="card-header">Registros de imagenes</div>
       <div class="card-body">
@@ -45,7 +28,6 @@
                 <th>Producto</th>
                 <th class="text-center">Imagen</th>
                 <th>Descripcion</th>
-                <th class="text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -58,28 +40,10 @@
                   <img src="{{ i.url }}" alt="Imagen producto" class="img-thumbnail">
                 </td>
                 <td>{{ i.descripcion }}</td>
-                <td>
-                  <div class="cell-actions">
-                    <button
-                      type="button"
-                      class="btn btn-warning btn-sm"
-                      data-idmongo="{{ i._id }}"
-                      data-producto="{{ i.producto }}"
-                      data-descripcion="{{ i.descripcion }}"
-                      data-url="{{ i.url }}"
-                      onclick="cargarImagen(this)"
-                    >
-                      Editar
-                    </button>
-                    <form method="POST" action="/imagenes_productos/eliminar/{{ i._id }}" onsubmit="return confirm('Eliminar imagen en MongoDB?');">
-                      <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                    </form>
-                  </div>
-                </td>
               </tr>
               {% else %}
               <tr>
-                <td colspan="6">
+                <td colspan="5">
                   <div class="empty-state">
                     <p>No hay imagenes registradas</p>
                   </div>
@@ -93,102 +57,6 @@
     </div>
 
   </div>
-
-  <!-- Modal Crear -->
-  <div class="modal-overlay" id="modalCrearImagen">
-    <div class="modal">
-      <div class="modal-header">
-        <h5 class="modal-title">Agregar imagen</h5>
-        <button type="button" class="modal-close" onclick="closeModal('modalCrearImagen')">&times;</button>
-      </div>
-      <form method="POST" action="/imagenes_productos">
-        <div class="modal-body">
-          <div class="form-group">
-            <label class="form-label">Producto</label>
-            <input type="text" class="form-control" name="producto" minlength="2" maxlength="120" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Descripcion</label>
-            <input type="text" class="form-control" name="descripcion" minlength="3" maxlength="200" required>
-          </div>
-          <div class="form-group mb-0">
-            <label class="form-label">URL de imagen</label>
-            <input type="url" class="form-control" name="url" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modalCrearImagen')">Cancelar</button>
-          <button type="submit" class="btn btn-success">Guardar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal Editar -->
-  <div class="modal-overlay" id="modalEditarImagen">
-    <div class="modal">
-      <div class="modal-header">
-        <h5 class="modal-title">Editar imagen</h5>
-        <button type="button" class="modal-close" onclick="closeModal('modalEditarImagen')">&times;</button>
-      </div>
-      <form method="POST" action="/imagenes_productos/editar/0" id="formActualizarImagen">
-        <div class="modal-body">
-          <input type="hidden" name="idmongo" id="idmongoActualizar">
-          <div class="form-group">
-            <label class="form-label">Producto</label>
-            <input type="text" class="form-control" name="producto" minlength="2" maxlength="120" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Descripcion</label>
-            <input type="text" class="form-control" name="descripcion" minlength="3" maxlength="200" required>
-          </div>
-          <div class="form-group mb-0">
-            <label class="form-label">URL de imagen</label>
-            <input type="url" class="form-control" name="url" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modalEditarImagen')">Cancelar</button>
-          <button type="submit" class="btn btn-warning">Actualizar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    function openModal(id) {
-      document.getElementById(id).classList.add('active');
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('active');
-    }
-
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', function(e) {
-        if (e.target === this) {
-          this.classList.remove('active');
-        }
-      });
-    });
-
-    const formActualizarImagen = document.getElementById('formActualizarImagen');
-    const idmongoActualizar = document.getElementById('idmongoActualizar');
-
-    function cargarImagen(boton) {
-      const id = boton.dataset.idmongo;
-      idmongoActualizar.value = id;
-      formActualizarImagen.action = '/imagenes_productos/editar/' + id;
-      formActualizarImagen.querySelector('input[name="producto"]').value = boton.dataset.producto;
-      formActualizarImagen.querySelector('input[name="descripcion"]').value = boton.dataset.descripcion;
-      formActualizarImagen.querySelector('input[name="url"]').value = boton.dataset.url;
-      openModal('modalEditarImagen');
-    }
-
-    formActualizarImagen.addEventListener('submit', function() {
-      formActualizarImagen.action = '/imagenes_productos/editar/' + idmongoActualizar.value;
-    });
-  </script>
 
 </body>
 </html>
