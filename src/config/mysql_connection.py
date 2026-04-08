@@ -5,6 +5,6 @@ def get_mysql_connection():
     host="localhost",
     user="root",
     password="",
-    database="mercancia060426",
+    database="mercancia",
     cursorclass=pymysql.cursors.DictCursor
   )
